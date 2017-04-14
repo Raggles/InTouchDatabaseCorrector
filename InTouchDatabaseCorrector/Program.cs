@@ -11,7 +11,8 @@ namespace InTouchDatabaseCorrector
         public static void Main(string[] args)
         {
             string infile, outfile;
-            Console.WindowWidth = 200;
+            if (Console.LargestWindowWidth >= 200)
+                Console.WindowWidth = 200;
             ConsoleColor temp = Console.ForegroundColor;
             try
             {

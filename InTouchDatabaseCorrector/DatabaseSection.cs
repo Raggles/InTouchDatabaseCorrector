@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace InTouchDatabaseCorrector
@@ -20,8 +21,13 @@ namespace InTouchDatabaseCorrector
 
             for(int i = 0; i < numRows; ++i)
             {
-                string[] lineData = lines[i].Split(',');
-                data[i] = lineData;
+                var regex = new Regex("(?<=^|,)(\"(?:[^\"]|\"\")*\"|[^,]*)");
+                List<string> matches = new List<string>();
+                foreach (Match m in regex.Matches(lines[i]))
+                {
+                    matches.Add(m.Value);
+                }
+                data[i] = matches.ToArray();
             }
         }
 
@@ -31,7 +37,6 @@ namespace InTouchDatabaseCorrector
             {
                 stream.Write(string.Join(",", data[i]) + Environment.NewLine) ;
             }
-            
         }
 
         public bool Validate(bool repair, List<string> topics)
@@ -40,7 +45,6 @@ namespace InTouchDatabaseCorrector
             int accessNameIndex, maxEUIndex, minEUIndex, hiAlarmOnIndex, hihiAlarmOnIndex, hiAlarmValueIndex, hihiAlarmValueIndex, loAlarmOnIndex, loloAlarmOnIndex, loAlarmValueIndex, loloAlarmValueIndex, initialValueIndex, alarmMinorDevIndex;
             switch (data[0][0])
             {
-               
                 case ":IODisc":
                 case ":IOMsg":
                     accessNameIndex = Array.IndexOf(data[0], "AccessName");
@@ -52,11 +56,11 @@ namespace InTouchDatabaseCorrector
                             string temp = data[i][accessNameIndex];
                             string[] temp2 = data[i];
                             Console.WriteLine("Deleting " + data[i][0] + " for having an invalid Access Name");
+                            var res = data[i];
                             if (repair)
                             {
                                 data = data.Where((val, idx) => idx != i).ToArray();
-                                i--;
-                                
+                                i--;  
                             }
                         }
                     }
